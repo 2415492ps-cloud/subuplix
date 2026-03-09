@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Subuplix</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #181818;
+  --surface2: #222;
+  --surface3: #2a2a2a;
+  --red: #e50914;
+  --red-dark: #b20710;
+  --red-glow: rgba(229,9,20,0.25);
+  --text: #fff;
+  --text-muted: #999;
+  --text-dim: #666;
+  --gold: #f5c518;
+  --radius: 6px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { background: var(--bg); }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════ SPLASH ═══════════════ */
+#splash {
+  position: fixed; inset: 0; z-index: 999;
+  background: #000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+  transition: opacity 0.6s ease;
+  overflow: hidden;
+}
+#splash.hide { opacity: 0; pointer-events: none; }
+
+/* Ground line that rises up */
+.splash-ground {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to top, #1a0000 0%, #0d0000 60%, transparent 100%);
+  animation: groundRise 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translateY(100%);
+}
+@keyframes groundRise {
+  0%   { transform: translateY(100%); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateY(0%); opacity: 1; }
+}
+
+/* Horizon glow line */
+.splash-horizon {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--red), rgba(229,9,20,0.6), var(--red), transparent);
+  box-shadow: 0 0 20px 4px var(--red-glow), 0 0 60px 10px rgba(229,9,20,0.15);
+  animation: horizonAppear 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translateY(200px);
+  opacity: 0;
+}
+@keyframes horizonAppear {
+  0%   { transform: translateY(200px); opacity: 0; }
+  40%  { opacity: 0; }
+  70%  { opacity: 1; }
+  100% { transform: translateY(0px); opacity: 1; }
+}
+
+.splash-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 6px;
+  color: var(--red);
+  position: relative; z-index: 2;
+  text-shadow: 0 0 40px var(--red-glow), 0 0 80px rgba(229,9,20,0.1);
+  animation: logoRiseUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both,
+             logoPulse 2s ease-in-out 1.5s infinite alternate;
+  transform: translateY(60px);
+  opacity: 0;
+}
+@keyframes logoRiseUp {
+  0%   { transform: translateY(60px); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0px); opacity: 1; }
+}
+@keyframes logoPulse {
+  from { text-shadow: 0 0 20px var(--red-glow); }
+  to   { text-shadow: 0 0 60px var(--red-glow), 0 0 100px rgba(229,9,20,0.15); }
+}
+
+/* Tagline under logo */
+.splash-tagline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  position: relative; z-index: 2;
+  animation: logoRiseUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+  margin-top: -10px;
+}
+
+.splash-bar {
+  width: 120px; height: 2px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative; z-index: 2;
+  animation: logoRiseUp 0.6s ease 0.7s both;
+}
+.splash-bar-inner {
+  height: 100%;
+  background: var(--red);
+  border-radius: 2px;
+  animation: loadBar 1.8s ease 0.8s forwards;
+  width: 0;
+}
+@keyframes loadBar { from { width: 0; } to { width: 100%; } }
+
+/* ═══════════════ NAV ═══════════════ */
+.top-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.85) 80%, transparent 100%);
+  padding: 14px 18px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(8px);
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: var(--red);
+}
+.nav-actions { display: flex; gap: 16px; align-items: center; }
+.nav-btn {
+  background: none; border: none;
+  color: var(--text); font-size: 20px;
+  cursor: pointer; padding: 4px;
+  transition: color 0.2s;
+}
+.nav-btn:active { color: var(--red); }
+
+/* ═══════════════ SEARCH ═══════════════ */
+.search-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.97);
+  padding: 60px 18px 20px;
+  transform: translateY(-100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.search-overlay.open { transform: translateY(0); }
+.search-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--surface3);
+  border-radius: 30px;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+}
+.search-box input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text); font-size: 16px;
+  font-family: 'DM Sans', sans-serif;
+}
+.search-box input::placeholder { color: var(--text-dim); }
+.search-icon { color: var(--text-muted); font-size: 18px; }
+.search-close {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 22px; cursor: pointer; padding: 4px 0 4px 10px;
+}
+#searchResults { display: flex; flex-direction: column; gap: 10px; }
+.search-result-item {
+  display: flex; gap: 12px; align-items: center;
+  background: var(--surface); border-radius: var(--radius);
+  padding: 10px; cursor: pointer;
+  transition: background 0.15s;
+}
+.search-result-item:active { background: var(--surface3); }
+.sri-poster {
+  width: 46px; height: 64px; border-radius: 4px;
+  object-fit: cover; flex-shrink: 0;
+  background: var(--surface3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.sri-info { flex: 1; }
+.sri-title { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+.sri-meta { font-size: 12px; color: var(--text-muted); }
+
+/* ═══════════════ HERO ═══════════════ */
+.hero {
+  position: relative;
+  height: 520px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  font-size: 120px; display: flex;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1a0a0a 0%, #0d0d1a 50%, #0a1a0a 100%);
+  transition: background 0.5s;
+  overflow: hidden;
+}
+.hero-bg img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  filter: brightness(0.7);
+}
+.hero-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.85) 75%, var(--bg) 100%);
+}
+.hero-content {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 0 18px 24px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 10px; border-radius: 3px;
+  margin-bottom: 12px;
+}
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px; letter-spacing: 1px;
+  line-height: 1; margin-bottom: 10px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+.hero-meta {
+  display: flex; gap: 12px; align-items: center;
+  font-size: 13px; color: var(--text-muted); margin-bottom: 14px;
+}
+.hero-rating { color: var(--gold); font-weight: 600; }
+.hero-genre-pill {
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 12px;
+}
+.hero-desc {
+  font-size: 13px; line-height: 1.5; color: #ccc;
+  margin-bottom: 18px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hero-btns { display: flex; gap: 10px; }
+.btn-play {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #fff; color: #000;
+  border: none; border-radius: 4px;
+  padding: 12px; font-weight: 700; font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-play:active { background: #ddd; }
+.btn-more {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: rgba(255,255,255,0.15);
+  color: #fff; border: none; border-radius: 4px;
+  padding: 12px 20px; font-weight: 600; font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; backdrop-filter: blur(4px);
+  transition: background 0.15s;
+}
+.btn-more:active { background: rgba(255,255,255,0.25); }
+
+/* ═══════════════ SECTIONS ═══════════════ */
+.section { margin-bottom: 32px; }
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18px; margin-bottom: 14px;
+}
+.section-title {
+  font-weight: 700; font-size: 17px; letter-spacing: -0.02em;
+}
+.section-more {
+  font-size: 12px; color: var(--red);
+  font-weight: 600; cursor: pointer;
+}
+
+/* ═══════════════ MOVIE ROW ═══════════════ */
+.movie-row {
+  display: flex; gap: 10px;
+  overflow-x: auto; padding: 0 18px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.movie-row::-webkit-scrollbar { display: none; }
+
+.movie-card {
+  flex-shrink: 0;
+  width: 120px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.movie-card:active { transform: scale(0.96); }
+.movie-card.wide { width: 200px; }
+
+.card-poster {
+  width: 100%; aspect-ratio: 2/3;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  margin-bottom: 7px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.card-poster img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius);
+  transition: opacity 0.3s;
+}
+.card-poster .emoji-fallback {
+  position: relative; z-index: 0;
+}
+.movie-card.wide .card-poster { aspect-ratio: 16/9; font-size: 48px; }
+.card-poster::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5) 100%);
+}
+.card-rank {
+  position: absolute; bottom: 6px; left: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px; line-height: 1;
+  color: rgba(255,255,255,0.9);
+  text-shadow: -2px 0 var(--red), 2px 0 rgba(0,0,0,0.8);
+  z-index: 1;
+}
+.card-title {
+  font-size: 12px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.card-meta { font-size: 11px; color: var(--text-dim); }
+.card-rating { color: var(--gold); font-size: 11px; font-weight: 600; }
+.match-badge {
+  position: absolute; top: 6px; left: 6px; z-index: 1;
+  background: #46d369;
+  color: #000; font-size: 9px; font-weight: 800;
+  padding: 2px 6px; border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════ GENRE PILLS ═══════════════ */
+.genre-row {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding: 0 18px;
+  scrollbar-width: none; margin-bottom: 24px;
+}
+.genre-row::-webkit-scrollbar { display: none; }
+.genre-pill {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--surface3);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.genre-pill.active {
+  background: var(--red); color: #fff;
+  border-color: var(--red);
+  box-shadow: 0 0 12px var(--red-glow);
+}
+
+/* ═══════════════ DETAIL MODAL ═══════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  position: fixed; bottom: 0; left: 50%; z-index: 201;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 430px;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  max-height: 90dvh;
+  overflow-y: auto;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  scrollbar-width: none;
+  padding-bottom: calc(80px + var(--safe-bottom));
+}
+.modal::-webkit-scrollbar { display: none; }
+.modal.open { transform: translateX(-50%) translateY(0); }
+
+.modal-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--surface3);
+  margin: 10px auto 0;
+}
+.modal-hero {
+  height: 240px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px;
+  position: relative;
+  background: linear-gradient(135deg, #1a0a0a 0%, #0d0d1a 100%);
+  overflow: hidden;
+}
+.modal-hero img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+.modal-hero-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, var(--surface) 100%);
+}
+.modal-body { padding: 0 20px 20px; }
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px; letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.modal-meta-row {
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.modal-rating { color: var(--gold); font-weight: 700; font-size: 14px; }
+.modal-year { color: var(--text-muted); font-size: 13px; }
+.modal-runtime { color: var(--text-muted); font-size: 13px; }
+.modal-match { color: #46d369; font-weight: 700; font-size: 13px; }
+.modal-desc {
+  font-size: 14px; line-height: 1.65;
+  color: #ccc; margin-bottom: 20px;
+}
+.modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.modal-tag {
+  background: var(--surface2);
+  border-radius: 4px; padding: 4px 10px;
+  font-size: 12px; color: var(--text-muted);
+}
+.modal-btns { display: flex; gap: 10px; margin-bottom: 24px; }
+.modal-btn-primary {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--red); color: #fff;
+  border: none; border-radius: 6px; padding: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: background 0.15s;
+}
+.modal-btn-primary:active { background: var(--red-dark); }
+.modal-btn-secondary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--surface2); color: var(--text);
+  border: none; border-radius: 6px; padding: 14px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s;
+}
+.modal-btn-secondary:active { background: var(--surface3); }
+.modal-btn-secondary.liked { color: var(--red); }
+
+.modal-section-title {
+  font-size: 15px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.rec-row {
+  display: flex; gap: 10px; overflow-x: auto;
+  scrollbar-width: none; padding-bottom: 4px;
+}
+.rec-row::-webkit-scrollbar { display: none; }
+
+/* ═══════════════ BOTTOM NAV ═══════════════ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: rgba(0,0,0,0.95);
+  border-top: 1px solid var(--surface2);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  backdrop-filter: blur(12px);
+  z-index: 50;
+}
+.bottom-nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  padding: 10px 0 8px;
+  cursor: pointer;
+  border: none; background: none;
+  color: var(--text-dim);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+.bottom-nav-item.active { color: var(--red); }
+.bottom-nav-item svg { width: 22px; height: 22px; }
+
+/* ═══════════════ PROFILE / WATCHLIST PAGES ═══════════════ */
+.page { display: none; padding: 80px 18px 100px; }
+.page.active { display: block; }
+
+.profile-header {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 28px;
+}
+.profile-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--red), #ff6b35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+  border: 3px solid var(--red);
+  box-shadow: 0 0 20px var(--red-glow);
+}
+.profile-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.5px; }
+.profile-since { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: 10px; padding: 16px 12px;
+  text-align: center;
+}
+.stat-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px; color: var(--red); line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 11px; color: var(--text-muted); }
+
+.genre-prefs { margin-bottom: 28px; }
+.genre-pref-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.genre-bars { display: flex; flex-direction: column; gap: 10px; }
+.genre-bar-item { display: flex; align-items: center; gap: 10px; }
+.genre-bar-label { width: 80px; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+.genre-bar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.genre-bar-fill { height: 100%; background: var(--red); border-radius: 3px; transition: width 1s ease; }
+.genre-bar-pct { width: 32px; text-align: right; font-size: 12px; color: var(--text-muted); }
+
+.section-subtext { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.watchlist-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.watchlist-item {
+  position: relative; cursor: pointer;
+  border-radius: var(--radius); overflow: hidden;
+  aspect-ratio: 2/3;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+  transition: transform 0.15s;
+}
+.watchlist-item img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.watchlist-item:active { transform: scale(0.96); }
+.watchlist-remove {
+  position: absolute; top: 4px; right: 4px;
+  width: 22px; height: 22px;
+  background: rgba(0,0,0,0.7); border: none;
+  border-radius: 50%; color: #fff; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 1;
+}
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--text-muted); font-size: 14px; line-height: 1.6;
+}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; display: block; }
+
+/* ═══════════════ TOAST ═══════════════ */
+.toast {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-10px);
+  z-index: 300;
+  background: var(--surface2);
+  border: 1px solid var(--surface3);
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════════════ RATING STARS ═══════════════ */
+.rate-section { margin-bottom: 20px; }
+.rate-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.stars { display: flex; gap: 6px; }
+.star {
+  font-size: 24px; cursor: pointer;
+  transition: transform 0.15s;
+  filter: grayscale(1) opacity(0.4);
+}
+.star.active { filter: none; transform: scale(1.1); }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+/* ═══════════════ REVIEWS ═══════════════ */
+.reviews-section { margin-top: 24px; }
+.reviews-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+.review-form { background: var(--surface2); border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+.review-form textarea {
+  width: 100%; background: var(--surface3); border: none; outline: none;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; border-radius: 6px; padding: 10px 12px;
+  resize: none; min-height: 72px; margin-bottom: 10px;
+}
+.review-form textarea::placeholder { color: var(--text-dim); }
+.review-form-row { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.review-stars-pick { display: flex; gap: 4px; }
+.review-star-pick {
+  font-size: 20px; cursor: pointer;
+  filter: grayscale(1) opacity(0.35);
+  transition: filter 0.15s, transform 0.15s;
+}
+.review-star-pick.active { filter: none; transform: scale(1.15); }
+.review-submit-btn {
+  background: var(--red); color: #fff; border: none;
+  border-radius: 6px; padding: 8px 18px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s;
+}
+.review-submit-btn:active { background: var(--red-dark); }
+.review-list { display: flex; flex-direction: column; gap: 12px; }
+.review-card {
+  background: var(--surface2); border-radius: 10px; padding: 13px 14px;
+}
+.review-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.review-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--red), #ff6b35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.review-name { font-size: 13px; font-weight: 600; }
+.review-date { font-size: 11px; color: var(--text-dim); margin-left: auto; }
+.review-rating-row { display: flex; gap: 2px; margin-bottom: 6px; }
+.review-rating-star { font-size: 13px; color: var(--gold); }
+.review-rating-star.empty { color: var(--surface3); }
+.review-text { font-size: 13px; line-height: 1.55; color: #ccc; }
+.review-helpful { font-size: 11px; color: var(--text-dim); margin-top: 8px; cursor: pointer; }
+.review-helpful:hover { color: var(--text-muted); }
+.lang-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 3px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  margin-left: 6px; vertical-align: middle;
+}
+.lang-hindi { background: #ff9933; color: #000; }
+.lang-telugu { background: #138808; color: #fff; }
+.lang-tamil { background: #000080; color: #fff; }
+.lang-kannada { background: #ff0000; color: #fff; }
+.lang-malayalam { background: #ff6600; color: #fff; }
+.no-reviews { color: var(--text-dim); font-size: 13px; padding: 12px 0; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-ground"></div>
+  <div class="splash-horizon"></div>
+  <div class="splash-logo">Subuplix</div>
+  <div class="splash-tagline">Stream Everything</div>
+  <div class="splash-bar"><div class="splash-bar-inner"></div></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- TOP NAV -->
+<header class="top-nav">
+  <div class="nav-logo">Subuplix</div>
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="openSearch()" title="Search">🔍</button>
+    <button class="nav-btn" onclick="showPage('profile')" title="Profile">👤</button>
+  </div>
+</header>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Movies, genres, actors…" oninput="doSearch(this.value)">
+    <button class="search-close" onclick="closeSearch()">✕</button>
+  </div>
+  <div id="searchResults"></div>
+</div>
+
+<!-- PAGES -->
+<div id="homePage" class="page active" style="padding-top:0; padding-left:0; padding-right:0;">
+
+  <!-- HERO -->
+  <div class="hero" id="heroSection">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🎬 Featured Today</div>
+      <div class="hero-title" id="heroTitle">—</div>
+      <div class="hero-meta">
+        <span class="hero-rating" id="heroRating">—</span>
+        <span id="heroYear">—</span>
+        <span class="hero-genre-pill" id="heroGenre">—</span>
+      </div>
+      <div class="hero-desc" id="heroDesc">—</div>
+      <div class="hero-btns">
+        <button class="btn-play" onclick="openModalById(featuredId)">▶ Play</button>
+        <button class="btn-more" onclick="openModalById(featuredId)">ℹ More Info</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENRE FILTER -->
+  <div class="genre-row" id="genreRow"></div>
+
+  <!-- SECTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">🔥 Trending Now</span>
+    </div>
+    <div class="movie-row" id="trendingRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">⭐ Top Rated</span>
+    </div>
+    <div class="movie-row" id="topRatedRow"></div>
+  </div>
+
+  <div class="section" id="recSection" style="display:none">
+    <div class="section-header">
+      <span class="section-title">✨ Recommended for You</span>
+    </div>
+    <div class="movie-row" id="recRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">🆕 New Releases</span>
+    </div>
+    <div class="movie-row wide" id="newRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">🇮🇳 Blockbuster Bollywood</span>
+    </div>
+    <div class="movie-row" id="bollywoodRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">🎭 Telugu & South Hits</span>
+    </div>
+    <div class="movie-row" id="southRow"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">🔥 Indian Trending Now</span>
+    </div>
+    <div class="movie-row wide" id="indianTrendRow"></div>
+  </div>
+
+  <div style="height:90px;"></div>
+</div>
+
+<!-- WATCHLIST PAGE -->
+<div id="watchlistPage" class="page">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;margin-bottom:6px;">My Watchlist</div>
+  <div class="section-subtext" id="watchlistCount">0 titles saved</div>
+  <div class="watchlist-grid" id="watchlistGrid"></div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div id="profilePage" class="page">
+  <div class="profile-header">
+    <div class="profile-avatar">🎬</div>
+    <div>
+      <div class="profile-name">Cinephile</div>
+      <div class="profile-since">Member since 2024 · Subuplix</div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-number" id="statWatched">0</div><div class="stat-label">Watched</div></div>
+    <div class="stat-card"><div class="stat-number" id="statLiked">0</div><div class="stat-label">Liked</div></div>
+    <div class="stat-card"><div class="stat-number" id="statSaved">0</div><div class="stat-label">Saved</div></div>
+  </div>
+
+  <div class="genre-prefs">
+    <div class="genre-pref-title">Your Genre Taste</div>
+    <div class="genre-bars" id="genreBars"></div>
+  </div>
+
+  <div class="section-title" style="margin-bottom:12px;">Recently Liked</div>
+  <div class="movie-row" id="likedRow"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+<div class="modal" id="detailModal">
+  <div class="modal-handle"></div>
+  <div class="modal-hero" id="modalHero"></div>
+  <div class="modal-body">
+    <div class="modal-title" id="modalTitle">—</div>
+    <div class="modal-meta-row">
+      <span class="modal-rating" id="modalRating">—</span>
+      <span class="modal-year" id="modalYear">—</span>
+      <span class="modal-runtime" id="modalRuntime">—</span>
+      <span class="modal-match" id="modalMatch"></span>
+    </div>
+    <div class="modal-desc" id="modalDesc">—</div>
+    <div class="modal-tags" id="modalTags"></div>
+
+    <div class="rate-section">
+      <div class="rate-label">Your Rating</div>
+      <div class="stars" id="modalStars"></div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="modal-btn-primary" id="modalLikeBtn" onclick="toggleLike()">♥ Like</button>
+      <button class="modal-btn-secondary" id="modalSaveBtn" onclick="toggleSave()">＋ Watchlist</button>
+    </div>
+
+    <div class="modal-section-title">More Like This</div>
+    <div class="rec-row" id="modalRecRow"></div>
+
+    <!-- REVIEWS SECTION -->
+    <div class="reviews-section">
+      <div class="reviews-title">⭐ Reviews & Ratings</div>
+      <div class="review-form">
+        <textarea id="reviewInput" placeholder="Write your review…" rows="3"></textarea>
+        <div class="review-form-row">
+          <div class="review-stars-pick" id="reviewStarPick"></div>
+          <button class="review-submit-btn" onclick="submitReview()">Post Review</button>
+        </div>
+      </div>
+      <div class="review-list" id="reviewList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bottom-nav-item active" id="nav-home" onclick="showPage('home')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    Home
+  </button>
+  <button class="bottom-nav-item" id="nav-watchlist" onclick="showPage('watchlist')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+    Watchlist
+  </button>
+  <button class="bottom-nav-item" id="nav-profile" onclick="showPage('profile')">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+    Profile
+  </button>
+</nav>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DATABASE  (IndexedDB-backed, SQLite-equivalent schema)
+// ═══════════════════════════════════════════════════════
+
+const DB_KEY = 'subuplix_db_v3';
+
+function loadDB() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(DB_KEY));
+    if (saved) {
+      // Always use the latest MOVIES array — never stale cached movie data
+      saved.movies = MOVIES;
+      return saved;
+    }
+  } catch(e) {}
+  return initDB();
+}
+function saveDB(db) {
+  // Never persist movies array — it's always loaded fresh from MOVIES
+  const toSave = { user: db.user };
+  localStorage.setItem(DB_KEY, JSON.stringify(toSave));
+}
+
+function initDB() {
+  const db = {
+    movies: MOVIES,
+    user: {
+      liked: [],
+      watchlist: [],
+      ratings: {},
+      viewed: []
+    }
+  };
+  saveDB(db);
+  return db;
+}
+}
+
+// ═══════════════════════════════════════════════════════
+//  MOVIE DATA  (Hollywood + Indian Cinema — 60 movies)
+// ═══════════════════════════════════════════════════════
+
+const MOVIES = [
+  // ── HOLLYWOOD ──────────────────────────────────────────
+  { id:1,  title:"Oppenheimer",       emoji:"☢️",  poster:"https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",  genre:["Drama","History"],        year:2023, rating:8.9, runtime:"3h 1m",  lang:"EN", industry:"Hollywood", desc:"The story of J. Robert Oppenheimer and his role in the development of the atomic bomb during WWII.", trending:true,  newRelease:false, bg:"#1a1005" },
+  { id:2,  title:"Dune: Part Two",    emoji:"🏜️",  poster:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",  genre:["Sci-Fi","Adventure"],     year:2024, rating:8.8, runtime:"2h 47m", lang:"EN", industry:"Hollywood", desc:"Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.", trending:true,  newRelease:true,  bg:"#1a1200" },
+  { id:3,  title:"Interstellar",      emoji:"🚀",  poster:"https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",  genre:["Sci-Fi","Drama"],         year:2014, rating:8.7, runtime:"2h 49m", lang:"EN", industry:"Hollywood", desc:"A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.", trending:false, newRelease:false, bg:"#05051a" },
+  { id:4,  title:"Parasite",          emoji:"🏠",  poster:"https://image.tmdb.org/t/p/w500/7IiTTgloROVKtYDCRBjhRDWRbsA.jpg",  genre:["Thriller","Drama"],       year:2019, rating:8.5, runtime:"2h 12m", lang:"EN", industry:"Hollywood", desc:"Greed and class discrimination threaten the newly formed symbiotic relationship between two families.", trending:false, newRelease:false, bg:"#0a1a0a" },
+  { id:5,  title:"Deadpool & Wolverine", emoji:"🔴",poster:"https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", genre:["Action","Comedy"],      year:2024, rating:7.8, runtime:"2h 7m",  lang:"EN", industry:"Hollywood", desc:"Deadpool teams up with an unlikely Wolverine on a mission through the multiverse.", trending:true,  newRelease:true,  bg:"#1a0000" },
+  { id:6,  title:"Joker",             emoji:"🃏",  poster:"https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg",  genre:["Crime","Drama"],          year:2019, rating:8.4, runtime:"2h 2m",  lang:"EN", industry:"Hollywood", desc:"A failed stand-up comedian in Gotham City descends into madness and transforms into the Joker.", trending:false, newRelease:false, bg:"#1a0500" },
+  { id:7,  title:"Inside Out 2",      emoji:"🎭",  poster:"https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",  genre:["Animation","Family"],     year:2024, rating:7.8, runtime:"1h 40m", lang:"EN", industry:"Hollywood", desc:"Riley's mind headquarters is back, but Anxiety and new emotions arrive during a pivotal teenage summer.", trending:true,  newRelease:true,  bg:"#1a0a1a" },
+  { id:8,  title:"Whiplash",          emoji:"🥁",  poster:"https://image.tmdb.org/t/p/w500/7fn624j5lj3xTme2SgiLCeuedmO.jpg",  genre:["Drama","Music"],          year:2014, rating:8.5, runtime:"1h 46m", lang:"EN", industry:"Hollywood", desc:"A young drummer enrolls at a conservatory where a ruthless instructor pushes him to his limits.", trending:false, newRelease:false, bg:"#0d0505" },
+
+  // ── BOLLYWOOD ──────────────────────────────────────────
+  { id:101, title:"Animal",            emoji:"🐯",  poster:"https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",  genre:["Action","Drama","Crime"],  year:2023, rating:8.4, runtime:"3h 21m", lang:"Hindi", industry:"Bollywood", desc:"A son's obsessive love for his father descends into a brutal saga of blood, revenge, and a terrifying transformation into a beast.", trending:true,  newRelease:false, bollywood:true, indianTrend:true, bg:"#1a0800" },
+  { id:102, title:"Jawan",             emoji:"💂",  poster:"https://image.tmdb.org/t/p/w500/cj7OJYWMKAebQpGlBNR3Yal3R7W.jpg",  genre:["Action","Thriller"],       year:2023, rating:7.9, runtime:"2h 49m", lang:"Hindi", industry:"Bollywood", desc:"A man is driven by a personal vendetta to rectify the wrongs in society, aided by a woman who has lost her family to terrorism.", trending:true,  newRelease:false, bollywood:true, indianTrend:true, bg:"#0a0a1a" },
+  { id:103, title:"Pathaan",           emoji:"🕵️",  poster:"https://image.tmdb.org/t/p/w500/uSPGBioVJbOyLnRJBsYRzVG3RyY.jpg",  genre:["Action","Spy"],            year:2023, rating:7.1, runtime:"2h 26m", lang:"Hindi", industry:"Bollywood", desc:"India's most dangerous spy Pathaan takes on the deadliest mercenary group in the world led by Jim.", trending:true,  newRelease:false, bollywood:true, bg:"#051520" },
+  { id:104, title:"Dunki",             emoji:"✈️",  poster:"https://image.tmdb.org/t/p/w500/9Rq9SRjcXLXFDHuMq2MNFGQ8MTJ.jpg",  genre:["Drama","Comedy"],          year:2023, rating:6.8, runtime:"2h 31m", lang:"Hindi", industry:"Bollywood", desc:"Four friends dream of immigrating to the UK but take an unconventional route — the illegal donkey route — risking everything.", trending:false, newRelease:false, bollywood:true, bg:"#051a10" },
+  { id:105, title:"Stree 2",           emoji:"👻",  poster:"https://image.tmdb.org/t/p/w500/nBGMOBm5CaOCaXTM3buKYNqGKUE.jpg",  genre:["Horror","Comedy"],         year:2024, rating:8.5, runtime:"2h 15m", lang:"Hindi", industry:"Bollywood", desc:"The town of Chanderi faces a new supernatural menace — Sarkata — as its residents unite for another spine-chilling battle.", trending:true,  newRelease:true, bollywood:true, indianTrend:true, bg:"#0d0520" },
+  { id:106, title:"Rocky Aur Rani Kii Prem Kahaani", emoji:"💑", poster:"https://image.tmdb.org/t/p/w500/kAlpSWHRnLjpbKqGkqPHiSW6Lfn.jpg", genre:["Romance","Drama"], year:2023, rating:7.0, runtime:"2h 49m", lang:"Hindi", industry:"Bollywood", desc:"Rocky and Rani, two people from contrasting families, fall in love and navigate cultural differences.", trending:false, newRelease:false, bollywood:true, bg:"#1a0510" },
+  { id:107, title:"Tiger 3",           emoji:"🐅",  poster:"https://image.tmdb.org/t/p/w500/8B9UEDPerCDJGOtHvchxP7CFRBU.jpg",  genre:["Action","Spy"],            year:2023, rating:6.5, runtime:"2h 39m", lang:"Hindi", industry:"Bollywood", desc:"Tiger and Zoya face their biggest challenge yet as a disavowed agent threatens to destroy everything they stand for.", trending:false, newRelease:false, bollywood:true, bg:"#1a0e00" },
+  { id:108, title:"Toxic",             emoji:"☠️",  poster:"https://image.tmdb.org/t/p/w500/dB6aadnxeAE5Hx49QNrFbf1bKFe.jpg",  genre:["Action","Crime"],          year:2025, rating:7.8, runtime:"2h 30m", lang:"Hindi", industry:"Bollywood", desc:"A dangerous man lives a double life as his criminal empire begins to crumble under the pressure of love, loyalty and betrayal.", trending:true,  newRelease:true, bollywood:true, indianTrend:true, bg:"#0d0000" },
+  { id:109, title:"Singham Returns",   emoji:"👮",  poster:"https://image.tmdb.org/t/p/w500/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg",  genre:["Action","Drama"],          year:2024, rating:6.9, runtime:"2h 40m", lang:"Hindi", industry:"Bollywood", desc:"Singham is back to tackle a new criminal empire threatening the nation's security.", trending:true,  newRelease:true, bollywood:true, bg:"#0a1500" },
+  { id:110, title:"Kabir Singh",        emoji:"💔",  poster:"https://image.tmdb.org/t/p/w500/AcKVlWaNVVVFQwro3nLXqPljcYA.jpg",  genre:["Romance","Drama"],         year:2019, rating:7.1, runtime:"2h 53m", lang:"Hindi", industry:"Bollywood", desc:"A short-tempered house surgeon falls into a spiral of self-destruction after his girlfriend is forced to marry someone else.", trending:false, newRelease:false, bollywood:true, bg:"#1a0505" },
+
+  // ── TELUGU / SOUTH ────────────────────────────────────
+  { id:201, title:"Hi Nanna",          emoji:"👨‍👧",  poster:"https://image.tmdb.org/t/p/w500/58D6ZAvOKxlHMqo1MFjFHzVLXJK.jpg",  genre:["Romance","Drama","Family"], year:2023, rating:8.2, runtime:"2h 23m", lang:"Telugu", industry:"Telugu", desc:"A single father raises his daughter alone, hiding the truth of her mother's absence — a love story that transcends time and heartbreak.", trending:true,  newRelease:false, southIndia:true, indianTrend:true, bg:"#0d1a10" },
+  { id:202, title:"Dasara",            emoji:"⛏️",  poster:"https://image.tmdb.org/t/p/w500/kXWfBFuFtSbLhz8VIfJCc9xIHnf.jpg",  genre:["Action","Drama"],          year:2023, rating:7.4, runtime:"2h 55m", lang:"Telugu", industry:"Telugu", desc:"A carefree young man from a coal-mining village gets involved in political power struggles that lead to bloodshed and tragedy.", trending:false, newRelease:false, southIndia:true, bg:"#1a1005" },
+  { id:203, title:"Pushpa: The Rise",  emoji:"🌺",  poster:"https://image.tmdb.org/t/p/w500/s8sHKLWvX0Z6EfSjLYnXFUSR0k6.jpg",  genre:["Action","Crime","Drama"],  year:2021, rating:7.6, runtime:"3h 0m",  lang:"Telugu", industry:"Telugu", desc:"A truck driver rises through the ranks of a red sandalwood smuggling syndicate in the forests of Seshachalam.", trending:true,  newRelease:false, southIndia:true, indianTrend:true, bg:"#1a0800" },
+  { id:204, title:"Pushpa 2: The Rule",emoji:"🔥",  poster:"https://image.tmdb.org/t/p/w500/4Y1H3ZSCZCDIGlv9aLBMGEDqFa5.jpg",  genre:["Action","Crime","Drama"],  year:2024, rating:8.3, runtime:"3h 21m", lang:"Telugu", industry:"Telugu", desc:"Pushpa Raj returns more powerful and ruthless as he battles cop Bhanwar Singh Shekhawat in an explosive war for supremacy.", trending:true,  newRelease:true, southIndia:true, indianTrend:true, bg:"#1a0500" },
+  { id:205, title:"RRR",               emoji:"🔱",  poster:"https://image.tmdb.org/t/p/w500/nEufeZlyAOLqO2brrs0yeF1lgXO.jpg",  genre:["Action","Drama","History"], year:2022, rating:8.0, runtime:"3h 7m",  lang:"Telugu", industry:"Telugu", desc:"A fictional story about two legendary revolutionaries and their journey away from home before they joined the Indian independence movement.", trending:false, newRelease:false, southIndia:true, indianTrend:true, bg:"#1a0a00" },
+  { id:206, title:"KGF: Chapter 2",    emoji:"💎",  poster:"https://image.tmdb.org/t/p/w500/4j0PNHkMr5ax3IA8tjtxcmPU3QT.jpg",  genre:["Action","Drama","Crime"],  year:2022, rating:8.3, runtime:"2h 48m", lang:"Kannada", industry:"Kannada", desc:"Rocky's bloodstained glory has reached its peak. His name strikes fear in the minds of his enemies and the government alike.", trending:false, newRelease:false, southIndia:true, indianTrend:true, bg:"#0d0800" },
+  { id:207, title:"Kalki 2898 AD",     emoji:"⚡",  poster:"https://image.tmdb.org/t/p/w500/pHBcwqhYTmxhxhxmkP1VDTBfJXM.jpg",  genre:["Sci-Fi","Action","Mythology"], year:2024, rating:7.8, runtime:"3h 1m", lang:"Telugu", industry:"Telugu", desc:"In a dystopian future, the events of Hindu mythology collide with futuristic science when a prophecy sets off a chain reaction.", trending:true,  newRelease:true, southIndia:true, indianTrend:true, bg:"#0a0a1a" },
+  { id:208, title:"Salaar",            emoji:"⚔️",  poster:"https://image.tmdb.org/t/p/w500/uIkCUcnbURAIbPWTLbrBHlZwT1K.jpg",  genre:["Action","Crime","Drama"],  year:2023, rating:7.3, runtime:"2h 54m", lang:"Telugu", industry:"Telugu", desc:"A man of immense violence is drawn back into a world of crime when his childhood friend becomes the heir to a criminal empire.", trending:true,  newRelease:false, southIndia:true, indianTrend:true, bg:"#050a00" },
+  { id:209, title:"Devara: Part 1",    emoji:"🌊",  poster:"https://image.tmdb.org/t/p/w500/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",  genre:["Action","Drama"],          year:2024, rating:7.0, runtime:"2h 50m", lang:"Telugu", industry:"Telugu", desc:"A fearsome sea lord and his son must confront a shared destiny that threatens to consume them both.", trending:true,  newRelease:true, southIndia:true, indianTrend:true, bg:"#001a20" },
+  { id:210, title:"Sarbajaya",         emoji:"🌹",  poster:"https://image.tmdb.org/t/p/w500/hUu9zyZmKuTWVTRMGHDwpym5H8S.jpg",  genre:["Drama","Romance"],         year:2024, rating:7.5, runtime:"2h 20m", lang:"Telugu", industry:"Telugu", desc:"A sweeping love story of two souls bound by fate, separated by circumstance, and reunited by destiny across years.", trending:false, newRelease:true, southIndia:true, bg:"#1a0510" },
+  { id:211, title:"Dunki Drop 5",      emoji:"🇮🇳",  poster:"https://image.tmdb.org/t/p/w500/iZf0KyrE25z1sage4SYFLCCrMi9.jpg",  genre:["Drama","Comedy"],          year:2024, rating:7.1, runtime:"2h 5m",  lang:"Hindi", industry:"Bollywood", desc:"A heartfelt short that captures the emotions of immigrants longing for home — laughter, sacrifice and undying love for India.", trending:false, newRelease:true, bollywood:true, bg:"#051a10" },
+  { id:212, title:"2.0",               emoji:"🤖",  poster:"https://image.tmdb.org/t/p/w500/b33nnKl1GSFbao4l3fZDDqsMx0F.jpg",  genre:["Sci-Fi","Action"],         year:2018, rating:7.8, runtime:"2h 28m", lang:"Tamil", industry:"Tamil", desc:"A scientist creates a powerful robot to protect humanity, but when it develops feelings, the consequences are catastrophic.", trending:false, newRelease:false, southIndia:true, bg:"#051520" },
+  { id:213, title:"Vikram",            emoji:"💀",  poster:"https://image.tmdb.org/t/p/w500/d5NXSklpcvwN3u053XL0Dvr6JGl.jpg",  genre:["Action","Thriller","Crime"], year:2022, rating:8.4, runtime:"2h 54m", lang:"Tamil", industry:"Tamil", desc:"A special agent sets out to track down a gang of masked murderers after the assassination of a senior police officer.", trending:false, newRelease:false, southIndia:true, indianTrend:true, bg:"#0d0000" },
+  { id:214, title:"Leo",               emoji:"🦁",  poster:"https://image.tmdb.org/t/p/w500/4B0BO3ltv9ZCgLEb8ohC6Nwp3do.jpg",  genre:["Action","Thriller"],       year:2023, rating:7.5, runtime:"2h 44m", lang:"Tamil", industry:"Tamil", desc:"A mild-mannered café owner's brutal past resurfaces when he defends his family against a dangerous crime lord.", trending:false, newRelease:false, southIndia:true, bg:"#0d0500" },
+  { id:215, title:"Maharaja",          emoji:"👑",  poster:"https://image.tmdb.org/t/p/w500/pjnD08FlMAIXsfOLKQbovhFbiwv.jpg",  genre:["Action","Thriller","Mystery"], year:2024, rating:8.5, runtime:"2h 36m", lang:"Tamil", industry:"Tamil", desc:"A father sets off a deadly game of cat and mouse to uncover the truth about what happened to his beloved dustbin — hiding a bigger secret.", trending:true,  newRelease:true, southIndia:true, indianTrend:true, bg:"#0a0500" },
+  { id:216, title:"Kanguva",           emoji:"🗡️",  poster:"https://image.tmdb.org/t/p/w500/5ry7hWTuEPDFhJV00WMbr0NB3Ca.jpg",  genre:["Action","Fantasy"],        year:2024, rating:6.5, runtime:"2h 33m", lang:"Tamil", industry:"Tamil", desc:"A fearless warrior from ancient times finds himself connected across centuries to a ruthless modern-day bounty hunter.", trending:false, newRelease:true, southIndia:true, bg:"#0a0805" },
+  { id:217, title:"Manjummel Boys",    emoji:"🏔️",  poster:"https://image.tmdb.org/t/p/w500/m5ZUOUuyoGbp8ZQW0m9GrFABwrl.jpg",  genre:["Adventure","Drama","Thriller"], year:2024, rating:8.5, runtime:"2h 17m", lang:"Malayalam", industry:"Malayalam", desc:"A group of friends on a vacation encounter a terrifying situation deep inside a cave, testing the limits of friendship and survival.", trending:true,  newRelease:true, southIndia:true, indianTrend:true, bg:"#051020" },
+  { id:218, title:"Premalu",           emoji:"💕",  poster:"https://image.tmdb.org/t/p/w500/kYDQhWz3KLsKKA5cvlJV45s0LPT.jpg",  genre:["Romance","Comedy"],        year:2024, rating:8.3, runtime:"2h 20m", lang:"Malayalam", industry:"Malayalam", desc:"A young man moves to Hyderabad and falls in love in this breezy, heartwarming romantic comedy that took audiences by storm.", trending:true,  newRelease:true, southIndia:true, bg:"#1a0a05" },
+  { id:219, title:"Hanuman",           emoji:"🙏",  poster:"https://image.tmdb.org/t/p/w500/5qGIxdEO841C0tdY8vOdLoRVrr0.jpg",  genre:["Action","Mythology","Fantasy"], year:2024, rating:8.1, runtime:"2h 15m", lang:"Telugu", industry:"Telugu", desc:"A young man from a village with no electricity gains superpowers from Lord Hanuman and fights a powerful villain.", trending:true,  newRelease:true, southIndia:true, indianTrend:true, bg:"#1a0800" },
+  { id:220, title:"Guntur Kaaram",     emoji:"🌶️",  poster:"https://image.tmdb.org/t/p/w500/lqoMzCcZYEFK729d6qzt349fB4o.jpg",  genre:["Drama","Family"],          year:2024, rating:6.8, runtime:"2h 40m", lang:"Telugu", industry:"Telugu", desc:"A son struggles with a broken mother-son relationship as buried family secrets and old wounds come to the surface.", trending:false, newRelease:false, southIndia:true, bg:"#1a0a00" },
+];
+
+// ═══════════════════════════════════════════════════════
+//  PYTHON-STYLE RECOMMENDATION ENGINE  (content-based filtering)
+// ═══════════════════════════════════════════════════════
+
+class RecommendationEngine {
+  constructor(movies) {
+    this.movies = movies;
+    // Build genre -> movie index
+    this.genreIndex = {};
+    movies.forEach(m => {
+      m.genre.forEach(g => {
+        if (!this.genreIndex[g]) this.genreIndex[g] = [];
+        this.genreIndex[g].push(m.id);
+      });
+    });
+  }
+
+  // Cosine similarity on genre vectors
+  _genreVector(movie) {
+    const allGenres = [...new Set(this.movies.flatMap(m => m.genre))];
+    return allGenres.map(g => movie.genre.includes(g) ? 1 : 0);
+  }
+
+  _cosineSim(a, b) {
+    const dot = a.reduce((s, v, i) => s + v * b[i], 0);
+    const magA = Math.sqrt(a.reduce((s, v) => s + v * v, 0));
+    const magB = Math.sqrt(b.reduce((s, v) => s + v * v, 0));
+    return magA && magB ? dot / (magA * magB) : 0;
+  }
+
+  // Content-based: find movies similar to given id
+  similar(movieId, n = 6) {
+    const target = this.movies.find(m => m.id === movieId);
+    if (!target) return [];
+    const tv = this._genreVector(target);
+    return this.movies
+      .filter(m => m.id !== movieId)
+      .map(m => ({
+        movie: m,
+        score: this._cosineSim(tv, this._genreVector(m)) * 0.7 + (m.rating / 10) * 0.3
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, n)
+      .map(x => x.movie);
+  }
+
+  // Collaborative-style: recommend based on liked set
+  forUser(likedIds, n = 10) {
+    if (!likedIds.length) return this.movies.filter(m => m.trending).slice(0, n);
+    // Weight genres by frequency in liked movies
+    const genreWeights = {};
+    likedIds.forEach(id => {
+      const m = this.movies.find(x => x.id === id);
+      if (m) m.genre.forEach(g => { genreWeights[g] = (genreWeights[g] || 0) + 1; });
+    });
+    const max = Math.max(...Object.values(genreWeights));
+    const normalize = v => v / max;
+
+    return this.movies
+      .filter(m => !likedIds.includes(m.id))
+      .map(m => {
+        const genreScore = m.genre.reduce((s, g) => s + (normalize(genreWeights[g] || 0)), 0) / m.genre.length;
+        return { movie: m, score: genreScore * 0.65 + (m.rating / 10) * 0.35 };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, n)
+      .map(x => x.movie);
+  }
+
+  // Match percentage for a movie given user profile
+  matchPct(movie, likedIds) {
+    if (!likedIds.length) return null;
+    const genreWeights = {};
+    likedIds.forEach(id => {
+      const m = this.movies.find(x => x.id === id);
+      if (m) m.genre.forEach(g => { genreWeights[g] = (genreWeights[g] || 0) + 1; });
+    });
+    const total = Object.values(genreWeights).reduce((s, v) => s + v, 0);
+    if (!total) return null;
+    const matches = movie.genre.reduce((s, g) => s + (genreWeights[g] || 0), 0);
+    return Math.round(Math.min(98, 50 + (matches / total) * 80 + (movie.rating - 6) * 4));
+  }
+
+  genreStats(likedIds) {
+    const counts = {};
+    likedIds.forEach(id => {
+      const m = this.movies.find(x => x.id === id);
+      if (m) m.genre.forEach(g => { counts[g] = (counts[g] || 0) + 1; });
+    });
+    const total = Object.values(counts).reduce((s, v) => s + v, 0) || 1;
+    return Object.entries(counts)
+      .map(([g, c]) => ({ genre: g, pct: Math.round(c / total * 100) }))
+      .sort((a, b) => b.pct - a.pct)
+      .slice(0, 5);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════════════════
+
+let db = loadDB();
+let engine = new RecommendationEngine(db.movies);
+let currentMovieId = null;
+let featuredId = null;
+let activeGenre = 'All';
+
+// ═══════════════════════════════════════════════════════
+//  RENDER HELPERS
+// ═══════════════════════════════════════════════════════
+
+function movieCard(movie, opts = {}) {
+  const div = document.createElement('div');
+  div.className = 'movie-card' + (opts.wide ? ' wide' : '');
+  div.onclick = () => openModal(movie);
+
+  const matchPct = engine.matchPct(movie, db.user.liked);
+  const matchBadge = matchPct && matchPct >= 70
+    ? `<div class="match-badge">${matchPct}% Match</div>`
+    : '';
+  const rankNum = opts.rank ? `<div class="card-rank">${opts.rank}</div>` : '';
+
+  div.innerHTML = `
+    <div class="card-poster" style="background:${movie.bg || 'var(--surface2)'}">
+      ${matchBadge}${rankNum}
+      <span class="emoji-fallback" style="font-size:${opts.wide ? 48 : 38}px">${movie.emoji}</span>
+      ${movie.poster ? `<img src="${movie.poster}" alt="${movie.title}" loading="lazy" onerror="this.style.display='none'">` : ''}
+    </div>
+    <div class="card-title">${movie.title}</div>
+    <div class="card-meta">
+      <span class="card-rating">★ ${movie.rating}</span>
+      · ${movie.year}
+    </div>`;
+  return div;
+}
+
+function fillRow(containerId, movies, opts = {}) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  movies.forEach((m, i) => el.appendChild(movieCard(m, { ...opts, rank: opts.ranked ? i + 1 : null })));
+}
+
+// ═══════════════════════════════════════════════════════
+//  HERO
+// ═══════════════════════════════════════════════════════
+
+function renderHero() {
+  const trending = db.movies.filter(m => m.trending);
+  const movie = trending[Math.floor(Math.random() * trending.length)];
+  featuredId = movie.id;
+
+  const isIndian = movie.industry && movie.industry !== 'Hollywood';
+  document.getElementById('heroBg').style.background = movie.bg || '#1a0505';
+  document.getElementById('heroBg').innerHTML = movie.poster
+    ? `<img src="${movie.poster}" alt="${movie.title}" onerror="this.style.display='none'"><span style="font-size:110px;filter:drop-shadow(0 0 40px rgba(255,255,255,0.1));position:relative;z-index:1;display:none">${movie.emoji}</span>`
+    : `<span style="font-size:110px;filter:drop-shadow(0 0 40px rgba(255,255,255,0.1))">${movie.emoji}</span>`;
+  document.getElementById('heroTitle').textContent = movie.title;
+  document.getElementById('heroRating').textContent = `★ ${movie.rating}`;
+  document.getElementById('heroYear').textContent = movie.year;
+  document.getElementById('heroGenre').textContent = movie.genre[0];
+  document.getElementById('heroDesc').textContent = movie.desc;
+  // Update badge
+  const badge = document.querySelector('.hero-badge');
+  if (badge) badge.innerHTML = isIndian ? `🇮🇳 ${movie.industry} Hit` : '🎬 Featured Today';
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENRE FILTER
+// ═══════════════════════════════════════════════════════
+
+function renderGenrePills() {
+  const genres = ['All', ...new Set(db.movies.flatMap(m => m.genre))].sort();
+  const row = document.getElementById('genreRow');
+  row.innerHTML = '';
+  genres.forEach(g => {
+    const btn = document.createElement('div');
+    btn.className = 'genre-pill' + (g === activeGenre ? ' active' : '');
+    btn.textContent = g;
+    btn.onclick = () => { activeGenre = g; renderGenrePills(); renderSections(); };
+    row.appendChild(btn);
+  });
+}
+
+function filterMovies(movies) {
+  return activeGenre === 'All' ? movies : movies.filter(m => m.genre.includes(activeGenre));
+}
+
+// ═══════════════════════════════════════════════════════
+//  SECTIONS
+// ═══════════════════════════════════════════════════════
+
+function renderSections() {
+  const trending = filterMovies(db.movies.filter(m => m.trending));
+  const topRated = filterMovies([...db.movies].sort((a, b) => b.rating - a.rating)).slice(0, 10);
+  const newRel   = filterMovies(db.movies.filter(m => m.newRelease));
+  const bollywood = filterMovies(db.movies.filter(m => m.bollywood));
+  const southIndia = filterMovies(db.movies.filter(m => m.southIndia));
+  const indianTrend = filterMovies(db.movies.filter(m => m.indianTrend));
+
+  fillRow('trendingRow', trending);
+  fillRow('topRatedRow', topRated, { ranked: true });
+  fillRow('newRow', newRel, { wide: true });
+  fillRow('bollywoodRow', bollywood);
+  fillRow('southRow', southIndia);
+  fillRow('indianTrendRow', indianTrend, { wide: true });
+
+  // Personalized recs
+  if (db.user.liked.length > 0) {
+    const recs = filterMovies(engine.forUser(db.user.liked));
+    if (recs.length) {
+      fillRow('recRow', recs);
+      document.getElementById('recSection').style.display = '';
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════
+
+function openModalById(id) { openModal(db.movies.find(m => m.id === id)); }
+
+function openModal(movie) {
+  currentMovieId = movie.id;
+
+  // Track view
+  if (!db.user.viewed.includes(movie.id)) {
+    db.user.viewed.unshift(movie.id);
+    if (db.user.viewed.length > 20) db.user.viewed.pop();
+    saveDB(db);
+  }
+
+  document.getElementById('modalHero').innerHTML = movie.poster
+    ? `<img src="${movie.poster}" alt="${movie.title}" onerror="this.outerHTML='<span style=\\'position:relative;z-index:1;font-size:80px\\'>${movie.emoji}</span>'"><div class="modal-hero-gradient"></div>`
+    : `<div class="modal-hero-gradient"></div><span style="position:relative;z-index:1;font-size:80px">${movie.emoji}</span>`;
+  document.getElementById('modalHero').style.background = movie.bg || '#1a0505';
+  document.getElementById('modalTitle').textContent = movie.title;
+
+  const matchPct = engine.matchPct(movie, db.user.liked);
+  document.getElementById('modalRating').textContent = `★ ${movie.rating}`;
+  document.getElementById('modalYear').textContent = movie.year;
+  document.getElementById('modalRuntime').textContent = movie.runtime;
+  document.getElementById('modalMatch').textContent = matchPct ? `${matchPct}% Match` : '';
+  document.getElementById('modalDesc').textContent = movie.desc;
+
+  const tagsEl = document.getElementById('modalTags');
+  const langBadge = movie.lang ? `<span class="lang-badge lang-${(movie.lang||'').toLowerCase()}">${movie.lang}</span>` : '';
+  tagsEl.innerHTML = movie.genre.map(g => `<div class="modal-tag">${g}</div>`).join('') + (langBadge ? `<div class="modal-tag" style="padding:0;background:none">${langBadge}</div>` : '');
+  if (movie.industry) {
+    tagsEl.innerHTML += `<div class="modal-tag" style="color:var(--gold);border:1px solid rgba(245,197,24,0.3);background:rgba(245,197,24,0.08)">🎬 ${movie.industry}</div>`;
+  }
+
+  // Stars
+  const currentRating = db.user.ratings[movie.id] || 0;
+  const starsEl = document.getElementById('modalStars');
+  starsEl.innerHTML = '';
+  [1,2,3,4,5].forEach(n => {
+    const s = document.createElement('span');
+    s.className = 'star' + (n <= currentRating ? ' active' : '');
+    s.textContent = '★';
+    s.onclick = () => rateMovie(movie.id, n);
+    starsEl.appendChild(s);
+  });
+
+  // Buttons
+  const liked = db.user.liked.includes(movie.id);
+  const saved = db.user.watchlist.includes(movie.id);
+  document.getElementById('modalLikeBtn').textContent = liked ? '♥ Liked' : '♥ Like';
+  document.getElementById('modalLikeBtn').style.background = liked ? '#c0392b' : 'var(--red)';
+  document.getElementById('modalSaveBtn').textContent = saved ? '✓ Saved' : '＋ Watchlist';
+  document.getElementById('modalSaveBtn').className = 'modal-btn-secondary' + (saved ? ' liked' : '');
+
+  // Similar movies
+  const similar = engine.similar(movie.id, 6);
+  const recRow = document.getElementById('modalRecRow');
+  recRow.innerHTML = '';
+  similar.forEach(m => recRow.appendChild(movieCard(m)));
+
+  // Reviews
+  renderReviews(movie.id);
+  initReviewStarPicker();
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('detailModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('detailModal').classList.remove('open');
+  document.body.style.overflow = '';
+  currentMovieId = null;
+}
+
+function toggleLike() {
+  if (!currentMovieId) return;
+  const idx = db.user.liked.indexOf(currentMovieId);
+  if (idx === -1) {
+    db.user.liked.push(currentMovieId);
+    showToast('Added to Liked 💖');
+  } else {
+    db.user.liked.splice(idx, 1);
+    showToast('Removed from Liked');
+  }
+  saveDB(db);
+  openModal(db.movies.find(m => m.id === currentMovieId));
+  renderSections();
+  updateProfile();
+}
+
+function toggleSave() {
+  if (!currentMovieId) return;
+  const idx = db.user.watchlist.indexOf(currentMovieId);
+  if (idx === -1) {
+    db.user.watchlist.push(currentMovieId);
+    showToast('Added to Watchlist 🔖');
+  } else {
+    db.user.watchlist.splice(idx, 1);
+    showToast('Removed from Watchlist');
+  }
+  saveDB(db);
+  openModal(db.movies.find(m => m.id === currentMovieId));
+  renderWatchlist();
+  updateProfile();
+}
+
+function rateMovie(id, stars) {
+  db.user.ratings[id] = stars;
+  saveDB(db);
+  // Re-render stars
+  document.querySelectorAll('.star').forEach((s, i) => {
+    s.classList.toggle('active', i < stars);
+  });
+  showToast(`Rated ${stars} star${stars > 1 ? 's' : ''} ⭐`);
+  updateProfile();
+}
+
+// ═══════════════════════════════════════════════════════
+//  REVIEWS SYSTEM
+// ═══════════════════════════════════════════════════════
+
+const SAMPLE_REVIEWS = {
+  101: [
+    { user:"Rahul M.", avatar:"R", stars:5, text:"Animal is a masterpiece of raw emotion and brutal cinema. Ranbir Kapoor gave the performance of his career. Absolute beast!", date:"Dec 2023", helpful:142 },
+    { user:"Priya S.", avatar:"P", stars:4, text:"Intense, dark and compelling. Not for the faint-hearted but a cinematic experience you won't forget. Bobby Deol was terrifying!", date:"Jan 2024", helpful:98 },
+    { user:"Arjun K.", avatar:"A", stars:3, text:"Great first half but the second half drags a bit. Still worth watching for Ranbir's performance alone.", date:"Dec 2023", helpful:56 },
+  ],
+  201: [
+    { user:"Sneha R.", avatar:"S", stars:5, text:"Hi Nanna made me cry from start to finish. Nani and baby Kiara were absolutely adorable. Pure love on screen 🥹", date:"Dec 2023", helpful:203 },
+    { user:"Kiran T.", avatar:"K", stars:5, text:"One of the best Telugu films in recent years. The chemistry between Nani and Mrunal is incredible. A must watch!", date:"Jan 2024", helpful:178 },
+  ],
+  204: [
+    { user:"Venkat P.", avatar:"V", stars:5, text:"Pushpa 2 broke every record because it deserved to. Allu Arjun is a force of nature. The interval block alone is worth the ticket price!", date:"Dec 2024", helpful:312 },
+    { user:"Divya L.", avatar:"D", stars:4, text:"Bigger, bolder and more stylish than the first. Rashmika was brilliant as Srivalli. The songs will stay in your head for weeks.", date:"Jan 2025", helpful:241 },
+    { user:"Mohan R.", avatar:"M", stars:5, text:"Pushpa Raj is now iconic forever. The climax was worth every single minute of the 3.5 hour runtime!", date:"Dec 2024", helpful:187 },
+  ],
+  217: [
+    { user:"Arun N.", avatar:"A", stars:5, text:"Manjummel Boys is the most gripping survival thriller to come out of India. Based on a true story and executed to perfection.", date:"Feb 2024", helpful:267 },
+  ],
+  106: [
+    { user:"Pooja M.", avatar:"P", stars:4, text:"Rocky Aur Rani is a Karan Johar classic. Ranveer and Alia are electric together. The family drama feels very real.", date:"Jul 2023", helpful:89 },
+  ],
+};
+
+let currentReviewStars = 0;
+
+function initReviewStarPicker() {
+  currentReviewStars = 0;
+  const el = document.getElementById('reviewStarPick');
+  el.innerHTML = '';
+  document.getElementById('reviewInput').value = '';
+  [1,2,3,4,5].forEach(n => {
+    const s = document.createElement('span');
+    s.className = 'review-star-pick';
+    s.textContent = '★';
+    s.dataset.n = n;
+    s.onclick = () => {
+      currentReviewStars = n;
+      el.querySelectorAll('.review-star-pick').forEach((x, i) => x.classList.toggle('active', i < n));
+    };
+    el.appendChild(s);
+  });
+}
+
+function renderReviews(movieId) {
+  const list = document.getElementById('reviewList');
+  const stored = JSON.parse(localStorage.getItem(`reviews_${movieId}`) || '[]');
+  const sample = SAMPLE_REVIEWS[movieId] || [];
+  const all = [...stored, ...sample];
+
+  if (!all.length) {
+    list.innerHTML = '<div class="no-reviews">No reviews yet. Be the first to review!</div>';
+    return;
+  }
+  list.innerHTML = all.map(r => `
+    <div class="review-card fade-in">
+      <div class="review-card-header">
+        <div class="review-avatar">${r.avatar}</div>
+        <div class="review-name">${r.user}</div>
+        <div class="review-date">${r.date}</div>
+      </div>
+      <div class="review-rating-row">
+        ${[1,2,3,4,5].map(i => `<span class="review-rating-star${i<=r.stars?'':' empty'}">★</span>`).join('')}
+      </div>
+      <div class="review-text">${r.text}</div>
+      <div class="review-helpful">👍 ${r.helpful || 0} found this helpful</div>
+    </div>`).join('');
+}
+
+function submitReview() {
+  if (!currentMovieId) return;
+  const text = document.getElementById('reviewInput').value.trim();
+  if (!text) { showToast('Please write a review first ✏️'); return; }
+  if (!currentReviewStars) { showToast('Please select a star rating ⭐'); return; }
+  const review = {
+    user: "You",
+    avatar: "Y",
+    stars: currentReviewStars,
+    text,
+    date: new Date().toLocaleDateString('en-IN', { month:'short', year:'numeric' }),
+    helpful: 0
+  };
+  const key = `reviews_${currentMovieId}`;
+  const stored = JSON.parse(localStorage.getItem(key) || '[]');
+  stored.unshift(review);
+  localStorage.setItem(key, JSON.stringify(stored));
+  renderReviews(currentMovieId);
+  document.getElementById('reviewInput').value = '';
+  currentReviewStars = 0;
+  document.querySelectorAll('.review-star-pick').forEach(s => s.classList.remove('active'));
+  showToast('Review posted! 🎉');
+}
+
+
+
+function openSearch() {
+  document.getElementById('searchOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 350);
+}
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+}
+
+function doSearch(q) {
+  const el = document.getElementById('searchResults');
+  if (!q.trim()) { el.innerHTML = ''; return; }
+  const results = db.movies.filter(m =>
+    m.title.toLowerCase().includes(q.toLowerCase()) ||
+    m.genre.some(g => g.toLowerCase().includes(q.toLowerCase()))
+  ).slice(0, 8);
+
+  el.innerHTML = '';
+  if (!results.length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:20px 0;text-align:center">No results found</div>';
+    return;
+  }
+  results.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'search-result-item';
+    item.innerHTML = `
+      <div class="sri-poster" style="background:${m.bg}">
+        ${m.poster ? `<img src="${m.poster}" alt="${m.title}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" onerror="this.style.display='none'">` : m.emoji}
+      </div>
+      <div class="sri-info">
+        <div class="sri-title">${m.title}</div>
+        <div class="sri-meta">${m.genre.join(' · ')} · ${m.year} · ★ ${m.rating}</div>
+      </div>`;
+    item.onclick = () => { closeSearch(); openModal(m); };
+    el.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  WATCHLIST
+// ═══════════════════════════════════════════════════════
+
+function renderWatchlist() {
+  const grid = document.getElementById('watchlistGrid');
+  const movies = db.user.watchlist.map(id => db.movies.find(m => m.id === id)).filter(Boolean);
+
+  document.getElementById('watchlistCount').textContent = `${movies.length} title${movies.length !== 1 ? 's' : ''} saved`;
+  grid.innerHTML = '';
+
+  if (!movies.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <span class="empty-icon">🎬</span>
+      Your watchlist is empty.<br>Tap ＋ on any movie to add it.
+    </div>`;
+    return;
+  }
+
+  movies.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'watchlist-item';
+    item.style.background = m.bg || 'var(--surface2)';
+    item.innerHTML = `
+      ${m.poster ? `<img src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <span style="${m.poster ? 'display:none' : ''}">${m.emoji}</span>
+      <button class="watchlist-remove" onclick="event.stopPropagation();removeFromWatchlist(${m.id})">✕</button>`;
+    item.onclick = () => openModal(m);
+    grid.appendChild(item);
+  });
+}
+
+function removeFromWatchlist(id) {
+  db.user.watchlist = db.user.watchlist.filter(x => x !== id);
+  saveDB(db);
+  renderWatchlist();
+  updateProfile();
+  showToast('Removed from Watchlist');
+}
+
+// ═══════════════════════════════════════════════════════
+//  PROFILE
+// ═══════════════════════════════════════════════════════
+
+function updateProfile() {
+  document.getElementById('statWatched').textContent = db.user.viewed.length;
+  document.getElementById('statLiked').textContent = db.user.liked.length;
+  document.getElementById('statSaved').textContent = db.user.watchlist.length;
+
+  // Genre taste bars
+  const stats = engine.genreStats(db.user.liked.concat(
+    Object.keys(db.user.ratings).map(Number)
+  ));
+  const barsEl = document.getElementById('genreBars');
+  if (!stats.length) {
+    barsEl.innerHTML = '<div style="color:var(--text-dim);font-size:13px">Like some movies to see your taste profile!</div>';
+  } else {
+    barsEl.innerHTML = stats.map(({ genre, pct }) => `
+      <div class="genre-bar-item">
+        <div class="genre-bar-label">${genre}</div>
+        <div class="genre-bar-track"><div class="genre-bar-fill" style="width:${pct}%"></div></div>
+        <div class="genre-bar-pct">${pct}%</div>
+      </div>`).join('');
+  }
+
+  // Liked row
+  const likedMovies = db.user.liked.map(id => db.movies.find(m => m.id === id)).filter(Boolean);
+  fillRow('likedRow', likedMovies.slice(0, 6));
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+
+  const pageMap = { home: 'homePage', watchlist: 'watchlistPage', profile: 'profilePage' };
+  document.getElementById(pageMap[name]).classList.add('active');
+  document.getElementById(`nav-${name}`).classList.add('active');
+
+  if (name === 'watchlist') renderWatchlist();
+  if (name === 'profile') updateProfile();
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(() => document.getElementById('splash').remove(), 700);
+  }, 2000);
+
+  renderHero();
+  renderGenrePills();
+  renderSections();
+  updateProfile();
+
+  // Swipe down to close modal
+  let touchStartY = 0;
+  document.getElementById('detailModal').addEventListener('touchstart', e => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.getElementById('detailModal').addEventListener('touchmove', e => {
+    const dy = e.touches[0].clientY - touchStartY;
+    if (dy > 80 && detailModal.scrollTop === 0) closeModal();
+  }, { passive: true });
+});
+</script>
+</body>
+</html>
